@@ -40,7 +40,7 @@ const Navbar = () => {
             </ul>
           </div>
           <Link to="/">
-            <a className="text-xl font-medium">Espresso Emporium</a>
+            <p className="text-xl font-medium">Espresso Emporium</p>
           </Link>
         </div>
         <div className="navbar-center hidden lg:flex">
