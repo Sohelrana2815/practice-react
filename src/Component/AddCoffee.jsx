@@ -11,7 +11,26 @@ const AddCoffee = () => {
       details: formData.get("details"),
       photoURL: formData.get("photoURL"),
     };
+
     console.log("Coffee Data", coffeeData);
+
+    // Send coffeeData to the server and database
+
+    fetch("http://localhost:5000/coffees", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify(coffeeData),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.data.insertedId) {
+          console.log(data.message);
+          alert("Coffee Added Successfully!");
+        }
+      });
+    e.target.reset();
   };
 
   return (
