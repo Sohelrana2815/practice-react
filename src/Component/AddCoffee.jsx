@@ -1,36 +1,100 @@
+import { useState } from "react";
+
+const imgBBApiKey = import.meta.env.VITE_IMG_BB_API_KEY;
 const AddCoffee = () => {
-  const handleAddCoffee = (e) => {
+  // State to store error message
+  const [fileError, setFileError] = useState("");
+  const handleFileChange = (e) => {
+    const file = e.target.files[0]; // Get the selected file
+
+    // Reset error message
+    setFileError("");
+    // Check if a file is selected
+
+    if (!file) {
+      setFileError("Please select an image file.");
+      return;
+    }
+    // Check file size (1 MB limit)
+    if (file.size > 1 * 1024 * 1024) {
+      setFileError("Image file size must be less than 1 MB.");
+      e.target.value = "";
+      return;
+    }
+
+    // Check file type
+
+    const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+
+    if (!allowedTypes.includes(file.type)) {
+      setFileError("Only JPEG, PNG, WEBP AND GIF images are allowed.");
+      e.target.value = "";
+      return;
+    }
+
+    // if all validations pass, you can proceed
+
+    console.log("File is valid", file);
+  };
+  const handleAddCoffee = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
-    const coffeeData = {
-      name: formData.get("name"),
-      chef: formData.get("chef"),
-      supplier: formData.get("supplier"),
-      taste: formData.get("taste"),
-      category: formData.get("category"),
-      details: formData.get("details"),
-      photoURL: formData.get("photoURL"),
-    };
+    const imageFile = formData.get("photo");
 
-    console.log("Coffee Data", coffeeData);
+    try {
+      // Step 1: Upload image to ImgBB
+      const imgBBFormData = new FormData();
 
-    // Send coffeeData to the server and database
+      imgBBFormData.append("image", imageFile);
 
-    fetch("http://localhost:5000/coffees", {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-      },
-      body: JSON.stringify(coffeeData),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.data.insertedId) {
-          console.log(data.message);
-          alert("Coffee Added Successfully!");
+      const imgBBResponse = await fetch(
+        `https://api.imgbb.com/1/upload?key=${imgBBApiKey}`,
+        {
+          method: "POST",
+          body: imgBBFormData,
         }
+      );
+
+      const imgBBData = await imgBBResponse.json();
+
+      console.log(imgBBData);
+
+      if (!imgBBData.success) {
+        throw new Error("Failed to upload image to ImgBB");
+      }
+
+      const imageURL = imgBBData.data.url;
+
+      // Step 2: Prepare coffee data with the image URL
+      const coffeeData = {
+        name: formData.get("name"),
+        chef: formData.get("chef"),
+        supplier: formData.get("supplier"),
+        taste: formData.get("taste"),
+        category: formData.get("category"),
+        details: formData.get("details"),
+        photoURL: imageURL, // Image URL from imgBB
+      };
+
+      // Step 3: Send coffee data to your backend
+
+      const response = await fetch("http://localhost:5000/coffees", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(coffeeData),
       });
-    e.target.reset();
+
+      const data = await response.json();
+
+      if (data.data.insertedId) {
+        alert("Coffee Added Successfully!");
+      }
+    } catch (error) {
+      console.error("Error", error);
+      alert("Failed to add coffee. Please try again.");
+    }
   };
 
   return (
@@ -114,8 +178,9 @@ const AddCoffee = () => {
                 name="category"
                 className="select select-bordered"
                 required
+                defaultValue=""
               >
-                <option value="" disabled selected>
+                <option value="" disabled>
                   Select coffee category
                 </option>
                 <option value="Hot Coffee">Hot Coffee</option>
@@ -148,18 +213,25 @@ const AddCoffee = () => {
           <div className="form-control">
             <label className="label">
               {/* photoURL */}
-              <span className="label-text">Photo URL</span>
+              <span className="label-text">Coffee Image</span>
             </label>
             <input
-              type="text"
-              name="photoURL"
+              type="file"
+              name="photo"
+              accept="image/*"
               placeholder="Photo url"
-              className="input input-bordered"
-              required
+              className="file-input file-input-bordered"
+              onChange={handleFileChange}
+              // required
             />
+            {fileError && (
+              <p className="text-red-500 text-sm mt-2">{fileError}</p>
+            )}
           </div>
           <div className="form-control mt-6">
-            <button className="btn btn-primary">Add Coffee</button>
+            <button type="submit" className="btn btn-primary">
+              Add Coffee
+            </button>
           </div>
         </form>
       </div>

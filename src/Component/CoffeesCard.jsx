@@ -2,7 +2,7 @@ import { FaRegEdit } from "react-icons/fa";
 import { BsInfoSquare } from "react-icons/bs";
 import { RiDeleteBin2Fill } from "react-icons/ri";
 import Swal from "sweetalert2";
-const Coffees = ({ coffee }) => {
+const CoffeesCard = ({ coffee, onDelete }) => {
   const { name, chef, supplier, taste, category, details, photoURL, _id } =
     coffee;
 
@@ -19,13 +19,20 @@ const Coffees = ({ coffee }) => {
       confirmButtonText: "Yes, delete it!",
     });
 
- if(confirmDelete.isConfirmed){
-  try{}
-  catch(){
-    
-  }
- }
+    if (confirmDelete.isConfirmed) {
+      try {
+        const response = await fetch(`http://localhost:5000/coffees/${id}`, {
+          method: "DELETE",
+        });
 
+        if (!response.ok) throw new Error("Failed to delete");
+        Swal.fire("Deleted!", "Your coffee has been deleted.", "success");
+        onDelete(id);
+        // Refresh or update state here
+      } catch (error) {
+        Swal.fire("Error!", error.message, "error");
+      }
+    }
   };
 
   return (
@@ -60,4 +67,4 @@ const Coffees = ({ coffee }) => {
   );
 };
 
-export default Coffees;
+export default CoffeesCard;
