@@ -110,13 +110,25 @@ const AddCoffee = () => {
                 {/* category */}
                 <span className="label-text">Category</span>
               </label>
-              <input
-                type="text"
+              <select
                 name="category"
-                placeholder="coffee Category"
-                className="input input-bordered"
+                className="select select-bordered"
                 required
-              />
+              >
+                <option value="" disabled selected>
+                  Select coffee category
+                </option>
+                <option value="Hot Coffee">Hot Coffee</option>
+                <option value="Iced Coffee">Iced Coffee</option>
+                <option value="Espresso">Espresso</option>
+                <option value="Cappuccino">Cappuccino</option>
+                <option value="Latte">Latte</option>
+                <option value="Cold Brew">Cold Brew</option>
+                <option value="Pour Over">Pour Over</option>
+                <option value="French Press">French Press</option>
+                <option value="Turkish Coffee">Turkish Coffee</option>
+                <option value="Specialty Drinks">Specialty Drinks</option>
+              </select>
             </div>
             <div className="form-control flex-1">
               <label className="label">
